@@ -1,5 +1,7 @@
 package com.app.backend.controller;
 
+import com.app.backend.dto.UserCreateRequest;
+import com.app.backend.dto.UserUpdateRequest;
 import com.app.backend.model.User;
 import com.app.backend.service.UserService;
 import com.app.backend.dto.MessageResponse;
@@ -38,39 +40,28 @@ public class UserController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user){
-        return ResponseEntity.ok(userservice.update(id, user));
-    }
-
-    @PutMapping("/{id}")
-    @PreAuthorize("hasRole('COORDINADOR')")
-    public ResponseEntity<User> updateMyProfile(@PathVariable Long id, @RequestBody User user, Authentication authentication){
+    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody UserUpdateRequest request){
         try{
-            return ResponseEntity.ok(userservice.update(id, user));
+            return ResponseEntity.ok(userservice.update(id, request));
         } catch (RuntimeException e){
-            return ResponseEntity.status(403).build();
+            if(e.getMessage().contains("No tiene permisos")){
+                return ResponseEntity.status(403).body(new MessageResponse(e.getMessage()));
+            }
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
         }
     }
-
-    @PutMapping("/{id}")
-@PreAuthorize("hasRole('COORDINADOR')")
-public ResponseEntity<User> updateMyProfile(@PathVariable Long id, @RequestBody User user, Authentication authentication){
-    Long authenticatedUserId = ((UserDetailsImpl) authentication.getPrincipal()).getId();
-    if (!authenticatedUserId.equals(id)) {
-        return ResponseEntity.status(403).build();
-    }
-    try {
-        return ResponseEntity.ok(userservice.update(id, user));
-    } catch (RuntimeException e) {
-        return ResponseEntity.status(403).build();
-    }
-}
-
 
     @DeleteMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<MessageResponse> deleteUser(@PathVariable Long id) {
-        userservice.delete(id);
-        return ResponseEntity.ok(new MessageResponse("Usuario eliminado con éxito"));
+        try{
+            userservice.delete(id);
+            return ResponseEntity.ok(new MessageResponse("Usuario eliminado exitosamente"));
+        } catch (RuntimeException e){
+            if(e.getMessage().contains("No tiene permisos")){
+                return ResponseEntity.status(403).body(new MessageResponse(e.getMessage()));
+            }
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        }
     }   
 }
