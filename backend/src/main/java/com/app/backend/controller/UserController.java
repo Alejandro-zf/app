@@ -28,14 +28,14 @@ public class UserController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'COORDINADOR')")
-    public ResponseEntity<User> getUserById(@PathVariable Long id){
+    public ResponseEntity<?> getUserById(@PathVariable Long id){
         try {
             return ResponseEntity.ok(userservice.findById(id));
         } catch (RuntimeException e) {
             if (e.getMessage().contains("no encontrado")) {
-                return ResponseEntity.status(404).body(null);
+                return ResponseEntity.status(404).body(new MessageResponse("Usuario no encontrado"));
             }
-            return ResponseEntity.badRequest().body(null);
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
         }
     }
 

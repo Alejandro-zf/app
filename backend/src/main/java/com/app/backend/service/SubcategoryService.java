@@ -36,7 +36,13 @@ public class SubcategoryService {
         subcategory.setName(subcategoryDetails.getName());
         subcategory.setDescription(subcategoryDetails.getDescription());
         subcategory.setActive(subcategoryDetails.getActive());
-        subcategory.setCategory(subcategoryDetails.getCategory());
+        
+        // Cargar la categoría desde la base de datos si se proporciona
+        if (subcategoryDetails.getCategory() != null && subcategoryDetails.getCategory().getId() != null) {
+            subcategory.setCategory(categoryRepository.findById(subcategoryDetails.getCategory().getId())
+                .orElseThrow(() -> new RuntimeException("Categoría no encontrada")));
+        }
+        
         return subcategoryRepository.save(subcategory);
     }
 

@@ -31,14 +31,14 @@ public class SubcategoryController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'COORDINADOR')")
-    public ResponseEntity<Subcategory> getSubcategoryById(@PathVariable Long id){
+    public ResponseEntity<?> getSubcategoryById(@PathVariable Long id){
         try {
             return ResponseEntity.ok(subcategoryService.findById(id));
         } catch (RuntimeException e) {
             if (e.getMessage().contains("no encontrado")) {
-                return ResponseEntity.status(404).body(null);
+                return ResponseEntity.status(404).body(new MessageResponse("Subcategoría no encontrada"));
             }
-            return ResponseEntity.badRequest().body(null);
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
         }
     }
 
