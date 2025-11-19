@@ -25,8 +25,10 @@ public class CategoryService {
 
     public Category update(Long id, Category categoryDetails){
         Category category = findById(id);
+        System.out.println("Valor recibido de active: " + categoryDetails.getActive());
         category.setName(categoryDetails.getName());
         category.setDescription(categoryDetails.getDescription());
+        category.setActive(categoryDetails.getActive());
         return categoryRepository.save(category);
     }
 
